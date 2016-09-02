@@ -1,6 +1,7 @@
 <!doctype html>
 <html><head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR</title>
 <script>
  /* (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -59,7 +60,19 @@ function update()
     var ecc =  parseInt(eccSelect.value)
     var ssize = parseInt(symSize.value)  // if this is 0, ecc is used
     run(textIn, ecc, ssize)
-    theimg.innerHTML = textOut
+    
+    //theimg.innerHTML = textOut
+    
+    var b = new Blob([textOut], {type: "image/svg+xml"});
+    var reader = new FileReader();
+    reader.onload = function(e) { 
+        theimg2.src = e.target.result 
+    }
+    reader.onerror = function(e) {
+        console.log(e)
+    }
+    reader.readAsDataURL(b); // read as data URL since we want to put it in an img src
+    
 }
 
 function format() {
@@ -146,7 +159,8 @@ function formatSeqNum(doRun) {
 <script src="js_qr_brd.js"></script>
 <style>
 #textEdit {
-    margin: 10px;
+    /*margin: 5px;*/
+    width: 100%
 }
 body, input {
     font-family: monospace;
@@ -156,41 +170,63 @@ body, input {
     font-size: 110%;
     font-weight: bold;
 }
+#theimg {
+    margin: 5px;
+}
+#theimg2 {
+    width: 100%;
+    margin: 20px 0 420px 0;
+}
+.unimpCol {
+    color: #bbb;
+}
 </style>
 </head>
 <body id="body" onload="start()" >
 <div id="errMsg"></div>
-First Name<br><input id="firstNameEd" type="text" value="John" oninput="formatName(true)"><br>
-Last Name<br><input id="lastNameEd" type="text" value="Doe" oninput="formatName(true)"><br>
-Booking-Ref<br><input id="bookRefEd" type="text" value="XYZ123" oninput="formatField(this, 'bookRef', 7, true)"><br>
-From<br><input id="fromEd" type="text" value="ZRH" oninput="formatField(this, 'from', 3, true)"><br>
-To<br><input id="toEd" type="text" value="SFO" oninput="formatField(this, 'to', 3, true)"><br>
-Flight Operator<br><input id="fOpEd" type="text" value="BA" oninput="formatField(this, 'fOp', 3, true)"><br>
-Flight Number<br><input id="fNumEd" type="text" value="1234" oninput="formatField(this, 'fNum', 5, true)"><br>
-Date<br><input id="dateEd" type="date" oninput="readDate(true)"><br>
-Day in year<br><input id="dayOfYearEd" type="text" value="0" oninput="formatDay(true)"><br>
-Class<br><select id="classSel" onchange="formatClass(true)">
+First Name<br>
+<input id="firstNameEd" type="text" value="John" oninput="formatName(true)"><br>
+Last Name<br>
+<input id="lastNameEd" type="text" value="Doe" oninput="formatName(true)"><br>
+<span class="unimpCol">Booking-Ref</span><br>
+<input id="bookRefEd" class="unimpCol" type="text" value="XYZ123" oninput="formatField(this, 'bookRef', 7, true)"><br>
+From<br>
+<input id="fromEd" type="text" value="ZRH" oninput="formatField(this, 'from', 3, true)"><br>
+To<br>
+<input id="toEd" type="text" value="SFO" oninput="formatField(this, 'to', 3, true)"><br>
+Flight Operator<br>
+<input id="fOpEd" type="text" value="BA" oninput="formatField(this, 'fOp', 3, true)"><br>
+Flight Number<br>
+<input id="fNumEd" type="text" value="1234" oninput="formatField(this, 'fNum', 5, true)"><br>
+Date<br>
+<input id="dateEd" type="date" oninput="readDate(true)"><br>
+<span class="unimpCol">Day in year</span><br>
+<input id="dayOfYearEd" type="text" class="unimpCol" value="0" oninput="formatDay(true)"><br>
+Class<br>
+<select id="classSel" onchange="formatClass(true)">
   <option value="F">First</option>
   <option value="C">Business</option>
   <option value="Y">Economy</option>
 </select><br>
-Seat<br><input id="seatNumEd" type="text" value="35A" oninput="formatSeat(true)"><br>
-Boarding Index<br><input id="seqNumEd" type="text" value="0001" oninput="formatSeqNum(true)"><br>
-
-<textarea id="textEdit" rows="4" cols="50" oninput="update()">
+Seat<br>
+<input id="seatNumEd" type="text" value="35A" oninput="formatSeat(true)"><br>
+Boarding Index<br>
+<input id="seqNumEd" class="unimpCol" type="text" value="0001" oninput="formatSeqNum(true)"><br>
+<span class="unimpCol">Raw Data:<span><br>
+<textarea id="textEdit" rows="4" cols="50" class="unimpCol" oninput="update()">
 hello</textarea>
-<br>Error-Correction
-<select id="eccSelect" onchange="update()">
+<br><span class="unimpCol">Error-Correction</span>
+<select id="eccSelect" class="unimpCol" onchange="update()">
   <option value="0">0</option>
   <option value="1">1</option>
   <option value="2">2</option>
   <option value="3">3</option>
 </select>
-<br>Symbol-Size
-<input id="symSize" type="number" onchange="update()" value="11">
+<br><span class="unimpCol">Symbol-Size</span>
+<input id="symSize" type="number" class="unimpCol" onchange="update()" value="11">
 
 <br><br>
- <div id="theimg"></div>
-    
+ <!--<div id="theimg"></div>-->
+ <img id="theimg2" src=""></img>   
 </body>
 </html>
