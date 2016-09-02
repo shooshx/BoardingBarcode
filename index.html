@@ -1,0 +1,84 @@
+<!doctype html>
+<html><head>
+<meta charset="UTF-8">
+<title>QR</title>
+<script>
+ /* (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-2231125-5', 'auto');
+  ga('send', 'pageview');*/
+</script>
+
+
+<script type="text/javascript">
+"use strict"
+    
+    
+var textOut = null
+    
+function start() 
+{
+    run = Module.cwrap('run', null, ['string', 'number', 'number'])
+    
+    run('hello', 0);
+    theimg.innerHTML = textOut
+}
+
+function update()
+{
+    var ecc =  parseInt(eccSelect.value)
+    var ssize = parseInt(symSize.value)  // if this is 0, ecc is used
+    run(textEdit.value, ecc, ssize)
+    theimg.innerHTML = textOut
+}
+
+    
+</script>
+<script src="js_qr_brd.js"></script>
+<style>
+#textEdit {
+    margin: 10px;
+}
+input {
+    font-family: monospace;
+}
+</style>
+</head>
+<body id="body" onload="start()" >
+
+First Name<br><input id="firstName" type="text" value="John"><br>
+Last Name<br><input id="lastName" type="text" value="Doe"><br>
+Booking-Ref<br><input id="bookRef" type="text" value="XYZ123"><br>
+From<br><input id="fromCity" type="text" value="ZRH"><br>
+To<br><input id="toCity" type="text" value="SFO"><br>
+Flight Operator<br><input id="fOp" type="text" value="BA"><br>
+Flight Number<br><input id="fNum" type="text" value="1234"><br>
+Day in year<br><input id="dayOfYear" type="text" value="0"><br>
+Seat<br><input id="seatNum" type="text" value="35A"><br>
+Class<br><select id="classSel" onchange="update()">
+  <option value="F">First</option>
+  <option value="C">Business</option>
+  <option value="Y">Economy</option>
+</select>
+<br>
+Boarding Index<br><input id="seatNum" type="text" value="1"><br>
+
+<textarea id="textEdit" rows="4" cols="50" oninput="update()">
+hello</textarea>
+<br>Error-Correction
+<select id="eccSelect" onchange="update()">
+  <option value="0">0</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+</select>
+<br>Symbol-Size
+<input id="symSize" type="number" onchange="update()">
+
+<br><br>
+ <div id="theimg"></div>
+    
+</body>
+</html>
