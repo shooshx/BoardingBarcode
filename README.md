@@ -7,7 +7,10 @@ Allows you to create any board pass barcode using a simple web interface:
 With this you can do what this guy does here:  
 http://gizmodo.com/hacker-builds-a-qr-code-generator-that-lets-him-into-fa-1784884083
 
-This software was created using freely available resources. There is no "hack" of any kind.
+This software was created using freely available resources.  
+
+This tool is intended for educational purposes only, use at your own personal risk.  
+
 
 ### Aztec barcode  
 https://en.wikipedia.org/wiki/Aztec_Code  
