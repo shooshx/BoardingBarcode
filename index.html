@@ -166,6 +166,9 @@ function formatSeqNum(doRun) {
 body, input {
     font-family: monospace;
 }
+input {
+    font-size: 120%;
+}
 #errMsg {
     color: red;
     font-size: 110%;
@@ -182,38 +185,47 @@ body, input {
 .unimpCol {
     color: #bbb;
 }
+#inputArea {
+    font-size: 120%;
+}
+.tlabel {
+    display: inline-block;
+    margin-top: 7px;
+}
 </style>
 </head>
 <body id="body" onload="start()" >
 <div id="errMsg"></div>
-First Name<br>
+<div id="inputArea">
+<span class="tlabel">First Name</span><br>
 <input id="firstNameEd" type="text" value="John" oninput="formatName(true)"><br>
-Last Name<br>
+<span class="tlabel">Last Name</span><br>
 <input id="lastNameEd" type="text" value="Doe" oninput="formatName(true)"><br>
-<span class="unimpCol">Booking-Ref</span><br>
+<span class="unimpCol tlabel">Booking-Ref</span><br>
 <input id="bookRefEd" class="unimpCol" type="text" value="XYZ123" oninput="formatField(this, 'bookRef', 7, true)"><br>
-From<br>
+<span class="tlabel">From</span><br>
 <input id="fromEd" type="text" value="ZRH" oninput="formatField(this, 'from', 3, true)"><br>
-To<br>
+<span class="tlabel">To</span><br>
 <input id="toEd" type="text" value="SFO" oninput="formatField(this, 'to', 3, true)"><br>
-Flight Operator<br>
+<span class="tlabel">Flight Operator</span><br>
 <input id="fOpEd" type="text" value="BA" oninput="formatField(this, 'fOp', 3, true)"><br>
-Flight Number<br>
+<span class="tlabel">Flight Number</span><br>
 <input id="fNumEd" type="text" value="1234" oninput="formatField(this, 'fNum', 5, true)"><br>
-Date<br>
+<span class="tlabel">Date</span><br>
 <input id="dateEd" type="date" oninput="readDate(true)"><br>
-<span class="unimpCol">Day in year</span><br>
+<span class="unimpCol tlabel">Day in year</span><br>
 <input id="dayOfYearEd" type="text" class="unimpCol" value="0" oninput="formatDay(true)"><br>
-Class<br>
+<span class="tlabel">Class</span><br>
 <select id="classSel" onchange="formatClass(true)">
   <option value="F">First</option>
   <option value="C">Business</option>
   <option value="Y">Economy</option>
 </select><br>
-Seat<br>
+<span class="tlabel">Seat</span><br>
 <input id="seatNumEd" type="text" value="35A" oninput="formatSeat(true)"><br>
-Boarding Index<br>
+<span class="unimpCol tlabel">Boarding Index</span><br>
 <input id="seqNumEd" class="unimpCol" type="text" value="0001" oninput="formatSeqNum(true)"><br>
+</div>
 <span class="unimpCol">Raw Data:<span><br>
 <textarea id="textEdit" rows="4" cols="50" class="unimpCol" oninput="update()">
 hello</textarea>
