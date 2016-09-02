@@ -37,11 +37,11 @@ function start()
     dateEd.value = todayInputValue()
     
     formatName()
-    formatField(bookRefEd, 'bookRef', 7)
-    formatField(fromEd, 'from', 3)
-    formatField(toEd, 'to', 3)
-    formatField(fOpEd, 'fOp', 3)
-    formatField(fNumEd, 'fNum', 5)
+    formatField('bookRef')
+    formatField('from')
+    formatField('to')
+    formatField('fOp')
+    formatField('fNum')
     readDate()
     formatClass()
     formatSeat()
@@ -51,10 +51,13 @@ function start()
 
 function errclear() {
     errMsg.innerHTML = ''
+    errMsg.style.visibility = 'hidden'
 }
 function err(msg) {
-    if (errMsg.innerHTML == '')
+    if (errMsg.innerHTML == '') {
         errMsg.innerHTML = msg
+        errMsg.style.visibility = 'visible'
+    }
 }
 
 function update()
@@ -106,7 +109,7 @@ function padLeft(s, n) {
 }
 
 function formatName(doRun) {
-    errclear('')
+    errclear()
     if (lastNameEd.value.length > 18) // need space for slash and last name
         err("first name longer than 18 charcters")
     var v = lastNameEd.value + "/" + firstNameEd.value
@@ -118,12 +121,21 @@ function formatName(doRun) {
         format()
 }
 
-function formatField(elem, name, padLen, doRun) {
+var fldDef = {
+    'bookRef': { pad: 7, desc:"Booking Ref"},
+    'from':    { pad: 3, desc:"From"},
+    'to':      { pad: 3, desc:"To"},
+    'fOp':     { pad: 3, desc:"Flight Operator"},
+    'fNum':    { pad: 5, desc:"Flight Number"}
+}
+
+function formatField(name, doRun) {
     errclear('')
-    var v = elem.value
-    if (v.length > padLen)
-        err(name + " longer than " + padLen + " chars")
-    fields[name] = upPadRight(v, padLen)
+    var def = fldDef[name]
+    var v = document.getElementById(name + "Ed").value
+    if (v.length > def.pad)
+        err('"' + def.desc + '" longer than ' + def.pad + " chars")
+    fields[name] = upPadRight(v, def.pad)
     if (doRun)
         format()
 }
@@ -153,12 +165,19 @@ function formatClass(doRun) {
         format()
 }
 function formatSeat(doRun) {
-    fields.seat = padLeft(seatNumEd.value, 4)
+    errclear()
+    var n = seatNumEd.value
+    if (n.length > 4)
+        err("Seat longer than 4 chars")
+    fields.seat = padLeft(n, 4)
     if (doRun)
         format()
 }
 function formatSeqNum(doRun) {
+    errclear()
     var n = seqNumEd.value
+    if (n.length > 4)
+        err("Seat longer than 4 chars")    
     fields.seqNum = upPadRight(padLeft(n, 4), 5)
     if (doRun)
         format()
@@ -179,9 +198,18 @@ input, #classSel {
     font-size: 130%;
 }
 #errMsg {
+    position: fixed;
+    top: 0;
+    left: 0;
     color: red;
-    font-size: 110%;
-    font-weight: bold;
+    font-size: 130%;
+    background-color: #fee;
+    text-align: center;
+    width: 96%;
+    padding: 4px;
+    border: red solid 1px;
+    visibility: hidden;
+    max-width: 500px;
 }
 #theimg {
     margin: 5px;
@@ -210,25 +238,26 @@ input, #classSel {
     display: inline-block;
     margin-top: 7px;
 }
+
 </style>
 </head>
 <body id="body" onload="start()" >
-<div id="errMsg"></div>
+<layer id="errLayer"><div id="errMsg"></div></layer>
 <div id="inputArea">
 <span class="tlabel">First Name</span><br>
 <input id="firstNameEd" type="text" value="John" oninput="formatName(true)"><br>
 <span class="tlabel">Last Name</span><br>
 <input id="lastNameEd" type="text" value="Doe" oninput="formatName(true)"><br>
 <span class="unimpCol tlabel">Booking-Ref</span><br>
-<input id="bookRefEd" class="unimpCol" type="text" value="XYZ123" oninput="formatField(this, 'bookRef', 7, true)"><br>
+<input id="bookRefEd" class="unimpCol" type="text" value="XYZ123" oninput="formatField('bookRef', true)"><br>
 <span class="tlabel">From</span><br>
-<input id="fromEd" type="text" value="ZRH" oninput="formatField(this, 'from', 3, true)"><br>
+<input id="fromEd" type="text" value="ZRH" oninput="formatField('from', true)"><br>
 <span class="tlabel">To</span><br>
-<input id="toEd" type="text" value="SFO" oninput="formatField(this, 'to', 3, true)"><br>
+<input id="toEd" type="text" value="SFO" oninput="formatField('to', true)"><br>
 <span class="tlabel">Flight Operator</span><br>
-<input id="fOpEd" type="text" value="BA" oninput="formatField(this, 'fOp', 3, true)"><br>
+<input id="fOpEd" type="text" value="BA" oninput="formatField('fOp',true)"><br>
 <span class="tlabel">Flight Number</span><br>
-<input id="fNumEd" type="text" value="1234" oninput="formatField(this, 'fNum', 5, true)"><br>
+<input id="fNumEd" type="text" value="1234" oninput="formatField('fNum', true)"><br>
 <span class="tlabel">Date</span><br>
 <input id="dateEd" type="date" oninput="readDate(true)"><br>
 <span class="unimpCol tlabel">Day in year</span><br>
