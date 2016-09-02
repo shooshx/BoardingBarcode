@@ -22,11 +22,14 @@ var textIn = ""
 var fields = {}
 
 var run, getDayOfYear
+var ctx = null
     
 function start() 
 {
     run = Module.cwrap('run', null, ['string', 'number', 'number'])
     getDayOfYear = Module.cwrap('getDayOfYear', null, ['number', 'number', 'number'])
+    
+    ctx = theimg3.getContext('2d')
 
  //   var d = new Date()
  //   var dy = getDayOfYear(d.getDate(), d.getMonth(), d.getFullYear())
@@ -61,8 +64,14 @@ function update()
     var ssize = parseInt(symSize.value)  // if this is 0, ecc is used
     run(textIn, ecc, ssize)
     
-    //theimg.innerHTML = textOut
+ //   theimg.innerHTML = textOut
     
+    theimg2.onload = function() {
+        theimg3.width = theimg2.width
+        theimg3.height = theimg2.height
+        ctx.drawImage(theimg2, 0, 0)
+    }
+ 
     var b = new Blob([textOut], {type: "image/svg+xml"});
     var reader = new FileReader();
     reader.onload = function(e) { 
@@ -72,7 +81,7 @@ function update()
         console.log(e)
     }
     reader.readAsDataURL(b); // read as data URL since we want to put it in an img src
-    
+        
 }
 
 function format() {
@@ -176,11 +185,20 @@ input, #classSel {
 }
 #theimg {
     margin: 5px;
+    max-width: 500px;
+    margin: 20px 0 420px 0;    
 }
 #theimg2 {
+   # width: 100%;
+   # max-width: 500px;
+   # margin: 20px 0 420px 0;
+   display: none;
+}
+#theimg3 {
     width: 100%;
+    margin: 5px;
     max-width: 500px;
-    margin: 20px 0 420px 0;
+    margin: 20px 0 420px 0;    
 }
 .unimpCol {
     color: #bbb;
@@ -226,7 +244,7 @@ input, #classSel {
 <span class="unimpCol tlabel">Boarding Index</span><br>
 <input id="seqNumEd" class="unimpCol" type="text" value="0001" oninput="formatSeqNum(true)"><br>
 </div>
-<span class="unimpCol">Raw Data:<span><br>
+<span class="unimpCol">Raw Data:</span><br>
 <textarea id="textEdit" rows="4" cols="50" class="unimpCol" oninput="update()">
 hello</textarea>
 <br><span class="unimpCol">Error-Correction</span>
@@ -240,7 +258,8 @@ hello</textarea>
 <input id="symSize" type="number" class="unimpCol" onchange="update()" value="11">
 
 <br><br>
- <!--<div id="theimg"></div>-->
+<!-- <div id="theimg"></div> -->
  <img id="theimg2" src=""></img>   
+ <canvas id="theimg3"></canvas>
 </body>
 </html>
