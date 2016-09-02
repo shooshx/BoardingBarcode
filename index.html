@@ -187,7 +187,6 @@ function formatSeqNum(doRun) {
 <script src="js_qr_brd.js"></script>
 <style>
 #textEdit {
-    /*margin: 5px;*/
     width: 100%;
     max-width: 500px;
 }
@@ -217,10 +216,9 @@ input, #classSel {
     margin: 20px 0 420px 0;    
 }
 #theimg2 {
-   # width: 100%;
-   # max-width: 500px;
-   # margin: 20px 0 420px 0;
-   display: none;
+   /*display: none;*/
+   visibility: hidden;
+   position: fixed; /* IE display none causes size to be 0 */
 }
 #theimg3 {
     width: 100%;
@@ -242,7 +240,7 @@ input, #classSel {
 </style>
 </head>
 <body id="body" onload="start()" >
-<layer id="errLayer"><div id="errMsg"></div></layer>
+<div id="errMsg"></div>
 <div id="inputArea">
 <span class="tlabel">First Name</span><br>
 <input id="firstNameEd" type="text" value="John" oninput="formatName(true)"><br>
@@ -288,7 +286,7 @@ hello</textarea>
 
 <br><br>
 <!-- <div id="theimg"></div> -->
- <img id="theimg2" src=""></img>   
+ <img id="theimg2">   
  <canvas id="theimg3"></canvas>
 </body>
 </html>
