@@ -9,10 +9,10 @@
   <ItemGroup>
     <ClCompile Include="src\reedsol.c" />
     <ClCompile Include="src\render.c" />
-    <ClCompile Include="src\svg.c" />
     <ClCompile Include="src\aztec.c" />
     <ClCompile Include="src\common.c" />
     <ClCompile Include="src\library.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\svg.c" />
   </ItemGroup>
 </Project>
