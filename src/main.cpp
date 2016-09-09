@@ -74,29 +74,6 @@ extern "C" int buf_printf(FILE* s, const char* format, ...)
 }
 
 
-extern "C" int getDayOfYear(int moday, int month, int year)
-{
-    cout << "DayFor " << moday << "," << month << "," << year << endl;
-    //time_t t = time(NULL);
-    struct tm in = {0};
-
-    in.tm_year = year - 1900;
-    in.tm_mon = month;
-    in.tm_mday = moday;
-    in.tm_hour = 0;
-    in.tm_min = 0;
-    in.tm_sec = 1;
-    in.tm_isdst = -1;
-
-    time_t t = mktime(&in);
-
-    struct tm *out = localtime(&t);
-
-    return out->tm_yday;
-}
-
-
-
 // error correction code - 0,1,2,3 - 0 or -1 use the default which is 2
 // symbol-size - 0-36, with 0, ecc is used
 extern "C" int run(const char* data, int ecc, int symsize)

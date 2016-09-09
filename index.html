@@ -27,8 +27,7 @@ var ctx = null
 function start() 
 {
     run = Module.cwrap('run', null, ['string', 'number', 'number'])
-    getDayOfYear = Module.cwrap('getDayOfYear', null, ['number', 'number', 'number'])
-    
+
     ctx = theimg3.getContext('2d')
 
  //   var d = new Date()
@@ -150,13 +149,24 @@ function todayInputValue() { // http://stackoverflow.com/questions/6982692/html5
  //   local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
     return local.toJSON().slice(0,10);
 }
+
+function dayOfYear(yr, mon, mday)
+{
+    var now = new Date(yr, mon, mday, 1, 0, 0)
+    var start = new Date(yr, 0, 1, 0, 0);
+    var diff = now - start;
+    var oneDay = 1000 * 60 * 60 * 24;
+    var day = Math.floor(diff / oneDay) + 1; // start at 1
+    return day
+}
+
 function readDate(toRun) {
     var dl = dateEd.value.split('-')
     var mday = parseInt(dl[2])
-    var mon = parseInt(dl[1]) - 1
+    var mon = parseInt(dl[1]) - 1  // the range of the input is [1-12]
     var yr = parseInt(dl[0])
     
-    dayOfYearEd.value = getDayOfYear(mday, mon, yr)
+    dayOfYearEd.value = dayOfYear(yr, mon, mday)
     formatDay(toRun)
 }
 function formatClass(doRun) {
