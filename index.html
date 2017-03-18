@@ -26,7 +26,7 @@ var ctx = null
     
 function start() 
 {
-    run = Module.cwrap('run', null, ['string', 'number', 'number'])
+    run = Module.cwrap('run', null, ['number', 'string', 'number', 'number'])
 
     ctx = theimg3.getContext('2d')
 
@@ -59,12 +59,16 @@ function err(msg) {
     }
 }
 
-function update()
+function update(fromRaw)
 {
-    textEdit.value = textIn
+    if (!fromRaw)
+        textEdit.value = textIn
+    else
+        textIn = textEdit.value
     var ecc =  parseInt(eccSelect.value)
     var ssize = parseInt(symSize.value)  // if this is 0, ecc is used
-    run(textIn, ecc, ssize)
+    var btype = parseInt(codeTypeSel.value)
+    run(btype, textIn, ecc, ssize)
     
  //   theimg.innerHTML = textOut
     
@@ -193,6 +197,14 @@ function formatSeqNum(doRun) {
         format()
 }    
 
+function typeUpdate() {
+    if (codeTypeSel.value == "0")
+        symSize.value = "11"  // size of the aztec
+    else
+        symSize.value = "6"  // columns in the barcode
+    update()
+}
+
 </script>
 <script src="js_qr_brd.js"></script>
 <style>
@@ -246,6 +258,9 @@ input, #classSel {
     display: inline-block;
     margin-top: 7px;
 }
+#codeTypeSel {
+    font-size: 120%;
+}
 
 </style>
 </head>
@@ -282,10 +297,11 @@ input, #classSel {
 <input id="seqNumEd" class="unimpCol" type="text" value="0001" oninput="formatSeqNum(true)"><br>
 </div>
 <span class="unimpCol">Raw Data:</span><br>
-<textarea id="textEdit" rows="4" cols="50" class="unimpCol" oninput="update()">
+<textarea id="textEdit" rows="4" cols="50" class="unimpCol" oninput="update(true)">
 hello</textarea>
 <br><span class="unimpCol">Error-Correction</span>
 <select id="eccSelect" class="unimpCol" onchange="update()">
+  <option value="0">-1</option>
   <option value="0">0</option>
   <option value="1">1</option>
   <option value="2">2</option>
@@ -293,6 +309,10 @@ hello</textarea>
 </select>
 <br><span class="unimpCol">Symbol-Size</span>
 <input id="symSize" type="number" class="unimpCol" onchange="update()" value="11">
+<br><select id="codeTypeSel" class="unimpCol" onchange="typeUpdate()">
+  <option value="0">aztec</option>
+  <option value="1">pdf417</option>
+</select>
 
 <br><br>
 <!-- <div id="theimg"></div> -->

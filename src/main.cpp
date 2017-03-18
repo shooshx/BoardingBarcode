@@ -76,38 +76,47 @@ extern "C" int buf_printf(FILE* s, const char* format, ...)
 
 // error correction code - 0,1,2,3 - 0 or -1 use the default which is 2
 // symbol-size - 0-36, with 0, ecc is used
-extern "C" int run(const char* data, int ecc, int symsize)
+extern "C" int run(int type, const char* data, int ecc, int symsize)
 {
-    g_buf.clear();
+    g_buf.clear(); // written to above in buf_printf
     struct zint_symbol *my_symbol;
 
     my_symbol = ZBarcode_Create();
     my_symbol->input_mode = DATA_MODE; //UNICODE_MODE;
-    my_symbol->symbology = 92;
 
     my_symbol->output_options += BARCODE_STDOUT;
     strncpy(my_symbol->outfile, "test_dummy.svg", 250);
+
+    if (type == 0) 
+        my_symbol->symbology = BARCODE_AZTEC; //92; // aztec
+    if (type == 1)
+        my_symbol->symbology = BARCODE_PDF417;
+
     my_symbol->scale = 10;
     my_symbol->option_1 = ecc;
     my_symbol->option_2 = symsize;
 
     int error_number = escape_char_process(my_symbol, (uint8_t*)data, strlen(data));
-    if (error_number == 0) {
-        error_number = ZBarcode_Print(my_symbol, 0); // rotate_angle
-    }
 
     if (error_number != 0) {
         fprintf(stderr, "%s\n", my_symbol->errtxt);
         fflush(stderr);
+        ZBarcode_Delete(my_symbol);
+        return -1;
     }
+    
+    error_number = ZBarcode_Print(my_symbol, 0); // rotate_angle
+
+#ifdef EMSCRIPTEN
+    EM_ASM_(textOut = Pointer_stringify($0), g_buf.c_str());
+#endif
+
+
 
     ZBarcode_Delete(my_symbol);
 
    // cout << "len=" << g_buf.size() << "," << strlen(g_buf.c_str()) << "--" << (int)g_buf[36] << "," << (int)g_buf[37] <<"," << (int)g_buf[38] << endl;
 
-#ifdef EMSCRIPTEN
-    EM_ASM_(textOut = Pointer_stringify($0), g_buf.c_str());
-#endif
 
     return 0;
 }

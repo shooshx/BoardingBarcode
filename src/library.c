@@ -575,8 +575,10 @@ int reduced_charset(struct zint_symbol *symbol, uint8_t *source, int length)
 		case BARCODE_CHANNEL: error_number = channel_code(symbol, preprocessed, length); break;
 		case BARCODE_CODEONE: error_number = code_one(symbol, preprocessed, length); break;
 		case BARCODE_DATAMATRIX: error_number = dmatrix(symbol, preprocessed, length); break;
+#endif
 		case BARCODE_PDF417: error_number = pdf417enc(symbol, preprocessed, length); break;
-		case BARCODE_PDF417TRUNC: error_number = pdf417enc(symbol, preprocessed, length); break;
+#if 0
+        case BARCODE_PDF417TRUNC: error_number = pdf417enc(symbol, preprocessed, length); break;
 		case BARCODE_MICROPDF417: error_number = micro_pdf417(symbol, preprocessed, length); break;
 		case BARCODE_MAXICODE: error_number = maxicode(symbol, preprocessed, length); break;
 #endif

@@ -5,6 +5,8 @@
     <ClInclude Include="src\reedsol.h" />
     <ClInclude Include="src\zint.h" />
     <ClInclude Include="src\aztec.h" />
+    <ClInclude Include="src\pdf417.h" />
+    <ClInclude Include="src\large.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\reedsol.c" />
@@ -14,5 +16,6 @@
     <ClCompile Include="src\library.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\svg.c" />
+    <ClCompile Include="src\pdf417.c" />
   </ItemGroup>
 </Project>
