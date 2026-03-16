@@ -1,0 +1,423 @@
+<!doctype html>
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boarding-Pass Barcode Aztec QR Generator</title>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-2231125-6', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+<script type="text/javascript">
+"use strict"
+    
+    
+var textOut = null
+var textIn = ""
+var fields = {}
+
+var run, getDayOfYear
+var ctx = null
+    
+function start() 
+{
+    run = Module.cwrap('run', null, ['number', 'string', 'number', 'number'])
+
+    ctx = theimg3.getContext('2d')
+
+    dateEd.value = todayInputValue()
+
+    bookRefEd.value = generateRandomAlphanumeric(6);
+    classSel.value = 'Y';
+    seqNumEd.value = Math.floor(Math.random() * 200) + 1;
+    
+    // Initialize fields with empty/default values, but don't generate barcode
+    formatName(false);
+    formatField('bookRef', false);
+    formatField('from', false);
+    formatField('to', false);
+    formatField('fOp', false);
+    formatField('fNum', false);
+    readDate(false);
+    formatClass(false);
+    formatSeat(false);
+    formatSeqNum(false);
+}
+
+function errclear() {
+    errMsg.innerHTML = ''
+    errMsg.style.visibility = 'hidden'
+}
+function err(msg) {
+    if (errMsg.innerHTML == '') {
+        errMsg.innerHTML = msg
+        errMsg.style.visibility = 'visible'
+    }
+}
+
+function generateRandomAlphanumeric(length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+function copyRawData() {
+    navigator.clipboard.writeText(textEdit.value)
+        .then(() => {
+            const copyButton = document.querySelector('.raw-data-container button');
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy';
+            }, 2000);
+        })
+        .catch(err => {
+            console.error('Failed to copy raw data: ', err);
+        });
+}
+
+function update(fromRaw)
+{
+    if (!fromRaw)
+        textEdit.value = textIn
+    else
+        textIn = textEdit.value
+    var ecc =  parseInt(eccSelect.value)
+    var ssize = parseInt(symSize.value)  // if this is 0, ecc is used
+    var btype = parseInt(codeTypeSel.value)
+    run(btype, textIn, ecc, ssize)
+    
+ //   theimg.innerHTML = textOut
+    
+    theimg2.onload = function() {
+        theimg3.width = theimg2.width
+        theimg3.height = theimg2.height
+        ctx.drawImage(theimg2, 0, 0)
+    }
+ 
+    var b = new Blob([textOut], {type: "image/svg+xml"});
+    var reader = new FileReader();
+    reader.onload = function(e) { 
+        theimg2.src = e.target.result 
+    }
+    reader.onerror = function(e) {
+        console.log(e)
+    }
+    reader.readAsDataURL(b); // read as data URL since we want to put it in an img src
+        
+}
+
+function format() {
+    textIn = "M1" + fields.name + "E" + fields.bookRef + fields.from + fields.to 
+             + fields.fOp + fields.fNum + fields.date + fields.cls + fields.seat + fields.seqNum
+             + "1" + "00"
+             // 1 passenger status, 00 - hex length of following data
+    update()
+}
+function upPadRight(s, n) {
+    s = s.toUpperCase()
+    while(s.length < n)
+        s = s + ' ';
+    return s.substr(0,n)
+}
+
+function padLeft(s, n) {
+    s = s.toUpperCase()
+    while(s.length < n)
+        s = '0' + s;
+    return s.substr(0,n)
+}
+
+function formatName(doRun) {
+    errclear()
+    if (lastNameEd.value.length > 18) // need space for slash and last name
+        err("first name longer than 18 charcters")
+    var v = lastNameEd.value + "/" + firstNameEd.value
+    if (v.length > 20)
+        err("first+last name longer than 20 characters")
+
+    fields.name = upPadRight(v, 20)
+    if (doRun)
+        format()
+}
+
+var fldDef = {
+    'bookRef': { pad: 7, desc:"Booking Ref"},
+    'from':    { pad: 3, desc:"From"},
+    'to':      { pad: 3, desc:"To"},
+    'fOp':     { pad: 3, desc:"Flight Operator"},
+    'fNum':    { pad: 5, desc:"Flight Number"}
+}
+
+function formatField(name, doRun) {
+    errclear('')
+    var def = fldDef[name]
+    var v = document.getElementById(name + "Ed").value
+    if (v.length > def.pad)
+        err('"' + def.desc + '" longer than ' + def.pad + " chars")
+    fields[name] = upPadRight(v, def.pad)
+    if (doRun)
+        format()
+}
+
+function formatDay(doRun) {
+    fields.date = padLeft(dayOfYearEd.value, 3)
+    if (doRun)
+        format()
+}
+function todayInputValue() { // http://stackoverflow.com/questions/6982692/html5-input-type-date-default-value-to-today
+    var local = new Date();
+ //   local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+    return local.toJSON().slice(0,10);
+}
+
+function dayOfYear(yr, mon, mday)
+{
+    var now = new Date(yr, mon, mday, 1, 0, 0)
+    var start = new Date(yr, 0, 1, 0, 0);
+    var diff = now - start;
+    var oneDay = 1000 * 60 * 60 * 24;
+    var day = Math.floor(diff / oneDay) + 1; // start at 1
+    return day
+}
+
+function readDate(toRun) {
+    var dl = dateEd.value.split('-')
+    var mday = parseInt(dl[2])
+    var mon = parseInt(dl[1]) - 1  // the range of the input is [1-12]
+    var yr = parseInt(dl[0])
+    
+    dayOfYearEd.value = dayOfYear(yr, mon, mday)
+    formatDay(toRun)
+}
+function formatClass(doRun) {
+    fields.cls = classSel.value
+    if (doRun)
+        format()
+}
+function formatSeat(doRun) {
+    errclear()
+    var n = seatNumEd.value
+    if (n.length > 4)
+        err("Seat longer than 4 chars")
+    fields.seat = padLeft(n, 4)
+    if (doRun)
+        format()
+}
+function formatSeqNum(doRun) {
+    errclear()
+    var n = seqNumEd.value
+    if (n.length > 4)
+        err("Seat longer than 4 chars")    
+    fields.seqNum = upPadRight(padLeft(n, 4), 5)
+    if (doRun)
+        format()
+}    
+
+function typeUpdate() {
+    if (codeTypeSel.value == "0")
+        symSize.value = "11"  // size of the aztec
+    else
+        symSize.value = "6"  // columns in the barcode
+    update()
+}
+
+</script>
+<script src="js_qr_brd.js"></script>
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        margin: 0;
+        padding: 15px;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    .form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .form-row-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .pre-raw-data-row {
+        margin-top: 15px;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+    input, select, textarea {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .raw-data-container {
+        margin-top: 15px;
+    }
+    .raw-data-container textarea {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .raw-data-container button {
+        margin-top: 5px;
+        padding: 8px 12px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .raw-data-container button:hover {
+        background-color: #0056b3;
+    }
+    #theimg3 {
+        display: block;
+        margin: 15px auto 0;
+        max-width: 100%;
+    }
+    #errMsg {
+        color: red;
+        background-color: #fee;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        text-align: center;
+        visibility: hidden;
+    }
+    .unimpCol {
+        display: none;
+    }
+</style>
+</head>
+<body id="body" onload="start()">
+
+    <div class="container">
+        <h1>Boarding-Pass Barcode Generator</h1>
+        <div id="errMsg"></div>
+
+        <div class="form-grid">
+            <div class="form-row-pair">
+                <div class="form-group">
+                    <label for="firstNameEd">First Name</label>
+                    <input id="firstNameEd" type="text" placeholder="John" oninput="formatName(true)">
+                </div>
+                <div class="form-group">
+                    <label for="lastNameEd">Last Name</label>
+                    <input id="lastNameEd" type="text" placeholder="Doe" oninput="formatName(true)">
+                </div>
+            </div>
+            <div class="form-row-pair">
+                <div class="form-group">
+                    <label for="fromEd">From</label>
+                    <input id="fromEd" type="text" placeholder="ZRH" oninput="formatField('from', true)">
+                </div>
+                <div class="form-group">
+                    <label for="toEd">To</label>
+                    <input id="toEd" type="text" placeholder="SFO" oninput="formatField('to', true)">
+                </div>
+            </div>
+            <div class="form-row-pair">
+                <div class="form-group">
+                    <label for="fOpEd">Flight Operator</label>
+                    <input id="fOpEd" type="text" placeholder="BA" oninput="formatField('fOp',true)">
+                </div>
+                <div class="form-group">
+                    <label for="fNumEd">Flight Number</label>
+                    <input id="fNumEd" type="text" placeholder="1234" oninput="formatField('fNum', true)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="dateEd">Date</label>
+                <input id="dateEd" type="date" oninput="readDate(true)">
+            </div>
+            <div class="form-row-pair">
+                 <div class="form-group">
+                    <label for="classSel">Class</label>
+                    <select id="classSel" onchange="formatClass(true)">
+                        <option value="Y">Economy</option>
+                        <option value="C">Business</option>
+                        <option value="F">First</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="seatNumEd">Seat</label>
+                    <input id="seatNumEd" type="text" placeholder="35A" oninput="formatSeat(true)">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row-pair pre-raw-data-row">
+            <div class="form-group">
+                <label for="bookRefEd">Booking Ref</label>
+                <input id="bookRefEd" type="text" oninput="formatField('bookRef', true)">
+            </div>
+            <div class="form-group">
+                <label for="seqNumEd">Boarding Index</label>
+                <input id="seqNumEd" type="text" oninput="formatSeqNum(true)">
+            </div>
+        </div>
+
+        <div class="raw-data-container">
+            <label for="textEdit">Raw Data</label>
+            <textarea id="textEdit" rows="4" oninput="update(true)"></textarea>
+            <button onclick="copyRawData()">Copy</button>
+        </div>
+
+        <div class="barcode-container">
+            <canvas id="theimg3"></canvas>
+        </div>
+    </div>
+
+    <!-- Hidden fields -->
+    <div class="unimpCol">
+        <input id="dayOfYearEd" type="text" oninput="formatDay(true)">
+        <select id="eccSelect" onchange="update()">
+            <option value="0">-1</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+        <input id="symSize" type="number" onchange="update()" value="11">
+        <select id="codeTypeSel" onchange="typeUpdate()">
+            <option value="0">aztec</option>
+            <option value="1">pdf417</option>
+        </select>
+    </div>
+    
+    <img id="theimg2" style="display: none;">
+
+</body>
+</html>
