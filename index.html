@@ -30,22 +30,23 @@ function start()
 
     ctx = theimg3.getContext('2d')
 
- //   var d = new Date()
- //   var dy = getDayOfYear(d.getDate(), d.getMonth(), d.getFullYear())
-  //  dayOfYearEd.value = '' + dy
     dateEd.value = todayInputValue()
+
+    bookRefEd.value = generateRandomAlphanumeric(6);
+    classSel.value = 'Y';
+    seqNumEd.value = Math.floor(Math.random() * 200) + 1;
     
-    formatName()
-    formatField('bookRef')
-    formatField('from')
-    formatField('to')
-    formatField('fOp')
-    formatField('fNum')
-    readDate()
-    formatClass()
-    formatSeat()
-    formatSeqNum()
-    format()
+    // Initialize fields with empty/default values, but don't generate barcode
+    formatName(false);
+    formatField('bookRef', false);
+    formatField('from', false);
+    formatField('to', false);
+    formatField('fOp', false);
+    formatField('fNum', false);
+    readDate(false);
+    formatClass(false);
+    formatSeat(false);
+    formatSeqNum(false);
 }
 
 function errclear() {
@@ -57,6 +58,29 @@ function err(msg) {
         errMsg.innerHTML = msg
         errMsg.style.visibility = 'visible'
     }
+}
+
+function generateRandomAlphanumeric(length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+function copyRawData() {
+    navigator.clipboard.writeText(textEdit.value)
+        .then(() => {
+            const copyButton = document.querySelector('.raw-data-container button');
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy';
+            }, 2000);
+        })
+        .catch(err => {
+            console.error('Failed to copy raw data: ', err);
+        });
 }
 
 function update(fromRaw)
@@ -208,115 +232,192 @@ function typeUpdate() {
 </script>
 <script src="js_qr_brd.js"></script>
 <style>
-#textEdit {
-    width: 100%;
-    max-width: 500px;
-}
-body, input {
-    font-family: monospace;
-}
-input, #classSel {
-    font-size: 130%;
-}
-#errMsg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    color: red;
-    font-size: 130%;
-    background-color: #fee;
-    text-align: center;
-    width: 96%;
-    padding: 4px;
-    border: red solid 1px;
-    visibility: hidden;
-    max-width: 500px;
-}
-#theimg {
-    margin: 5px;
-    max-width: 500px;
-    margin: 20px 0 420px 0;    
-}
-#theimg2 {
-   /*display: none;*/
-   visibility: hidden;
-   position: fixed; /* IE display none causes size to be 0 */
-}
-#theimg3 {
-    width: 100%;
-    margin: 5px;
-    max-width: 500px;
-    margin: 20px 0 420px 0;    
-}
-.unimpCol {
-    color: #bbb;
-}
-#inputArea {
-    font-size: 120%;
-}
-.tlabel {
-    display: inline-block;
-    margin-top: 7px;
-}
-#codeTypeSel {
-    font-size: 120%;
-}
-
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        margin: 0;
+        padding: 15px;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    .form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .form-row-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .pre-raw-data-row {
+        margin-top: 15px;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 0.9em;
+    }
+    input, select, textarea {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .raw-data-container {
+        margin-top: 15px;
+    }
+    .raw-data-container textarea {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .raw-data-container button {
+        margin-top: 5px;
+        padding: 8px 12px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .raw-data-container button:hover {
+        background-color: #0056b3;
+    }
+    #theimg3 {
+        display: block;
+        margin: 15px auto 0;
+        max-width: 100%;
+    }
+    #errMsg {
+        color: red;
+        background-color: #fee;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        text-align: center;
+        visibility: hidden;
+    }
+    .unimpCol {
+        display: none;
+    }
 </style>
 </head>
-<body id="body" onload="start()" >
-<div id="errMsg"></div>
-<div id="inputArea">
-<span class="tlabel">First Name</span><br>
-<input id="firstNameEd" type="text" value="John" oninput="formatName(true)"><br>
-<span class="tlabel">Last Name</span><br>
-<input id="lastNameEd" type="text" value="Doe" oninput="formatName(true)"><br>
-<span class="unimpCol tlabel">Booking-Ref</span><br>
-<input id="bookRefEd" class="unimpCol" type="text" value="XYZ123" oninput="formatField('bookRef', true)"><br>
-<span class="tlabel">From</span><br>
-<input id="fromEd" type="text" value="ZRH" oninput="formatField('from', true)"><br>
-<span class="tlabel">To</span><br>
-<input id="toEd" type="text" value="SFO" oninput="formatField('to', true)"><br>
-<span class="tlabel">Flight Operator</span><br>
-<input id="fOpEd" type="text" value="BA" oninput="formatField('fOp',true)"><br>
-<span class="tlabel">Flight Number</span><br>
-<input id="fNumEd" type="text" value="1234" oninput="formatField('fNum', true)"><br>
-<span class="tlabel">Date</span><br>
-<input id="dateEd" type="date" oninput="readDate(true)"><br>
-<span class="unimpCol tlabel">Day in year</span><br>
-<input id="dayOfYearEd" type="text" class="unimpCol" value="0" oninput="formatDay(true)"><br>
-<span class="tlabel">Class</span><br>
-<select id="classSel" onchange="formatClass(true)">
-  <option value="F">First</option>
-  <option value="C">Business</option>
-  <option value="Y">Economy</option>
-</select><br>
-<span class="tlabel">Seat</span><br>
-<input id="seatNumEd" type="text" value="35A" oninput="formatSeat(true)"><br>
-<span class="unimpCol tlabel">Boarding Index</span><br>
-<input id="seqNumEd" class="unimpCol" type="text" value="0001" oninput="formatSeqNum(true)"><br>
-</div>
-<span class="unimpCol">Raw Data:</span><br>
-<textarea id="textEdit" rows="4" cols="50" class="unimpCol" oninput="update(true)">
-hello</textarea>
-<br><span class="unimpCol">Error-Correction</span>
-<select id="eccSelect" class="unimpCol" onchange="update()">
-  <option value="0">-1</option>
-  <option value="0">0</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-</select>
-<br><span class="unimpCol">Symbol-Size</span>
-<input id="symSize" type="number" class="unimpCol" onchange="update()" value="11">
-<br><select id="codeTypeSel" class="unimpCol" onchange="typeUpdate()">
-  <option value="0">aztec</option>
-  <option value="1">pdf417</option>
-</select>
+<body id="body" onload="start()">
 
-<br><br>
-<!-- <div id="theimg"></div> -->
- <img id="theimg2">   
- <canvas id="theimg3"></canvas>
+    <div class="container">
+        <h1>Boarding-Pass Barcode Generator</h1>
+        <div id="errMsg"></div>
+
+        <div class="form-grid">
+            <div class="form-row-pair">
+                <div class="form-group">
+                    <label for="firstNameEd">First Name</label>
+                    <input id="firstNameEd" type="text" placeholder="John" oninput="formatName(true)">
+                </div>
+                <div class="form-group">
+                    <label for="lastNameEd">Last Name</label>
+                    <input id="lastNameEd" type="text" placeholder="Doe" oninput="formatName(true)">
+                </div>
+            </div>
+            <div class="form-row-pair">
+                <div class="form-group">
+                    <label for="fromEd">From</label>
+                    <input id="fromEd" type="text" placeholder="ZRH" oninput="formatField('from', true)">
+                </div>
+                <div class="form-group">
+                    <label for="toEd">To</label>
+                    <input id="toEd" type="text" placeholder="SFO" oninput="formatField('to', true)">
+                </div>
+            </div>
+            <div class="form-row-pair">
+                <div class="form-group">
+                    <label for="fOpEd">Flight Operator</label>
+                    <input id="fOpEd" type="text" placeholder="BA" oninput="formatField('fOp',true)">
+                </div>
+                <div class="form-group">
+                    <label for="fNumEd">Flight Number</label>
+                    <input id="fNumEd" type="text" placeholder="1234" oninput="formatField('fNum', true)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="dateEd">Date</label>
+                <input id="dateEd" type="date" oninput="readDate(true)">
+            </div>
+            <div class="form-row-pair">
+                 <div class="form-group">
+                    <label for="classSel">Class</label>
+                    <select id="classSel" onchange="formatClass(true)">
+                        <option value="Y">Economy</option>
+                        <option value="C">Business</option>
+                        <option value="F">First</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="seatNumEd">Seat</label>
+                    <input id="seatNumEd" type="text" placeholder="35A" oninput="formatSeat(true)">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row-pair pre-raw-data-row">
+            <div class="form-group">
+                <label for="bookRefEd">Booking Ref</label>
+                <input id="bookRefEd" type="text" oninput="formatField('bookRef', true)">
+            </div>
+            <div class="form-group">
+                <label for="seqNumEd">Boarding Index</label>
+                <input id="seqNumEd" type="text" oninput="formatSeqNum(true)">
+            </div>
+        </div>
+
+        <div class="raw-data-container">
+            <label for="textEdit">Raw Data</label>
+            <textarea id="textEdit" rows="4" oninput="update(true)"></textarea>
+            <button onclick="copyRawData()">Copy</button>
+        </div>
+
+        <div class="barcode-container">
+            <canvas id="theimg3"></canvas>
+        </div>
+    </div>
+
+    <!-- Hidden fields -->
+    <div class="unimpCol">
+        <input id="dayOfYearEd" type="text" oninput="formatDay(true)">
+        <select id="eccSelect" onchange="update()">
+            <option value="0">-1</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select>
+        <input id="symSize" type="number" onchange="update()" value="11">
+        <select id="codeTypeSel" onchange="typeUpdate()">
+            <option value="0">aztec</option>
+            <option value="1">pdf417</option>
+        </select>
+    </div>
+    
+    <img id="theimg2" style="display: none;">
+
 </body>
 </html>
